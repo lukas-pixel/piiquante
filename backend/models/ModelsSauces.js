@@ -2,7 +2,8 @@
 const mongoose = require('mongoose');
 
 // creation du schema des models de sauce
-let sauceSchema = mongoose.Schema({
+let saucesSchema = mongoose.Schema({
+    userId: { type: String, require: true },
     name: { type: String, require: true},
     manufacturer: { type: String, require: true},
     description: { type: String, require: true },
@@ -16,4 +17,4 @@ let sauceSchema = mongoose.Schema({
 });
 
 //export du schéma en tant que modèle Mongoose et le rendant disponible sur app express
-module.exports = mongoose.model('Sauce', sauceSchema);
+module.exports = mongoose.model('Sauces', saucesSchema);

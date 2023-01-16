@@ -1,0 +1,19 @@
+{
+  "name": "piiquante",
+  "version": "0.1.0",
+  "description": "OC-DW-P6",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukas-pixel/piiquante.git"
+  },
+  "author": "https://github.com/lukas-pixel",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/lukas-pixel/piiquante/issues"
+  },
+  "homepage": "https://github.com/lukas-pixel/piiquante#readme"
+}

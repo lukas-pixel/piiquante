@@ -2,7 +2,8 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const {hash} = require("bcrypt");
 
-exports.signup = (res, req, next) => {
+exports.signup = (req, res, next) => {
+    console.log('marine 1', req.body);
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
@@ -16,10 +17,10 @@ exports.signup = (res, req, next) => {
         .catch(error => res.status(500).json({ error }));
 };
 
-exports.login = (res, req, next) => {
+exports.login = (req, res, next) => {
     User.findOne({ email: req.body.email})
         .then(user => {
-            if (user === null) {
+            if (user === null || user === undefined) {
                 res.status(401).json({ message: 'Paire identifiant/mot de passe incorrecte' });
             } else {
                 bcrypt.compare(req.body.password, user.password)

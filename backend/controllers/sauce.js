@@ -3,9 +3,9 @@ const fs = require('fs');
 
 
 exports.createSauce = (req, res) => {
-    const sauceObject = JSON.parse(req.body.sauce);
+    let sauceObject = JSON.parse(req.body.sauce);
     delete sauceObject._id;
-    const sauce = new Sauce({
+    let sauce = new Sauce({
         ...sauceObject,
         likes: 0,
         dislikes: 0,

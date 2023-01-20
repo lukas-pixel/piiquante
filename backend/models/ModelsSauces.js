@@ -17,4 +17,4 @@ let saucesSchema = mongoose.Schema({
 });
 
 //export du schéma en tant que modèle Mongoose et le rendant disponible sur app express
-module.exports = mongoose.model('Sauces', saucesSchema);
+module.exports = mongoose.model('sauces', saucesSchema);

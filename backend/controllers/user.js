@@ -20,6 +20,7 @@ exports.signup = (req, res, next) => {
 exports.login = (req, res, next) => {
     User.findOne({ email: req.body.email})
         .then(user => {
+          console.log('MARINE 1 => ', user);
             if (user === null || user === undefined) {
                 res.status(401).json({ message: 'Paire identifiant/mot de passe incorrecte' });
             } else {

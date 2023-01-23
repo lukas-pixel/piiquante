@@ -3,7 +3,7 @@ const Sauce = require("../models/ModelsSauces");
 // importation du package file system pour modifier le système de fichiers
 const fs = require('fs');
 
-////////// FONCTION POUR CREER UNE SAUCE ///////
+////////// FONCTION POUR CREER UNE SAUCE //////////
 exports.createSauce = (req, res) => {
     // transforme la requête envoyée par le front en JSON
     let sauceObject = JSON.parse(req.body.sauce);
@@ -18,43 +18,50 @@ exports.createSauce = (req, res) => {
         usersLiked: [],
         usersDisliked: [],
         // modif de L'url de l'image
-        imageUrl : `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
     // sauvegarde du nouvel objet dans la base de donnée
     sauce.save()
-        .then(() => {res.status(201).json({message: 'Sauce enregistrée !'})})
+        .then(() => {res.status(201).json({ message: 'Sauce enregistrée !'})})
         .catch(error => res.status(400).json({error}))
 };
 
-////////// FONCTION POUR MODIFIER UNE SAUCE DANS LA BASE DE DONNEE ///////
+////////// FONCTION POUR MODIFIER UNE SAUCE DANS LA BASE DE DONNEE //////////
 exports.modifySauce = (req, res) => {
-    let sauceObject = req.file ? {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` } : { ...req.body };
-
-        delete sauceObject._userId;
+    if (req.file) {
+        // si l'image est modifiée, il faut supprimer l'ancienne image dans le dossier /images
         Sauce.findOne({ _id: req.params.id })
-            .then((sauce) => {
-                if (sauce.userId !== req.auth.userId) {
-                    res.status(401).json({ message: 'Not authorised'});
-                } else {
-                    Sauce.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
-                        .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-                        .catch(error => res.status(401).json({ error }));
-                }
+            .then(sauce => {
+                let filename = sauce.imageUrl.split('/images')[1];
+                fs.unlink(`images/${filename}`, () => {
+                    // une fois que l'ancienne image est supprimé dans le dossier /images, on peut mettre à jour le reste
+                    let sauceObject = {
+                        ...JSON.parse(req.body.sauce),
+                        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+                    }
+                    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+                        .then(() => res.status(200).json({ message: 'Sauce modifiée!' }))
+                        .catch(error => res.status(400).json({ error }));
+                })
             })
-            .catch(( error ) => {
-                res.status(400).json({ error });
-            })
+            .catch(error => res.status(500).json({ error }));
+    } else {
+        // si l'image n'est pas modifiée
+        let sauceObject = { ...req.body };
+        Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+            .then(() => res.status(200).json({ message: 'Sauce modifiée! '}))
+            .catch(error => res.status(400).josn({ error }));
+    }
     };
 
+////////// FONCTION POUR SUPPRIMER UNE SAUCE DANS LA BASE DE DONNEE //////////
 exports.deleteSauce = (req, res) => {
     Sauce.findOne({_id: req.params.id})
         .then(sauce => {
             if(req.auth.userId !== sauce.userId){
                 res.status(403).json({message: `Non autorisé !`})
             } else{
-                const filename = sauce.imageUrl.split("/").at(-1);
+                let filename = sauce.imageUrl.split("/").at(-1);
                 fs.unlink(`images/${filename}`, () => {
                     Sauce.deleteOne({ _id: req.params.id })
                         .then(() => res.status(200).json({ message: "Sauce supprimée !" }))
@@ -77,6 +84,7 @@ exports.getAllSauce = (req, res, next) => {
         .catch((error) => res.status(400).json({ error: error }));
 };
 
+////////// FONCTION POUR LIKE / DISLIKE UNE SAUCE //////////
 exports.likeSauce = (req, res) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {

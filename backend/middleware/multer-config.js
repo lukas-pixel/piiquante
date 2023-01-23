@@ -1,5 +1,6 @@
 const multer = require('multer');
 
+// format d'image authorisé
 const MIME_TYPES = {
     'image/jpg': 'jpg',
     'image/jpeg': 'jpg',
@@ -9,6 +10,7 @@ const MIME_TYPES = {
 // 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
+        // indique le dossier 'images' du back
         callback(null, 'images');
     },
     filename: (req, file, callback) => {
@@ -19,5 +21,5 @@ const storage = multer.diskStorage({
     }
 });
 
-
+// exportation du module avec l'objet storage en paramètre
 module.exports = multer({storage: storage}).single('image');

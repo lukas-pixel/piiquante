@@ -18,9 +18,12 @@ mongoose.connect(process.env.DB,
     .catch(() => console.log('Connexion à MongoDB échoué !'));
 
 const app = express();
+// ajout du middleware express.json afin d'extraire le corps JSON pour la requête POST
 app.use(express.json());
+// Contourner les erreurs de CORS
 app.use(cors());
 
+//charger des fichiers depuis dossier image
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/api/sauces', sauceRoutes);

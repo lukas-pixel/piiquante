@@ -6,7 +6,6 @@ const cors = require('cors');
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-console.log('MARINE => ', userRoutes);
 
 require('dotenv').config();
 
@@ -22,7 +21,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/api/sauce', sauceRoutes);
+app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 
 app.use('/images', express.static(path.join(__dirname, 'images')));

@@ -1,44 +1,52 @@
+// schema de sauce.js
 const Sauce = require("../models/ModelsSauces");
+// importation du package file system pour modifier le système de fichiers
 const fs = require('fs');
 
-
+////////// FONCTION POUR CREER UNE SAUCE ///////
 exports.createSauce = (req, res) => {
+    // transforme la requête envoyée par le front en JSON
     let sauceObject = JSON.parse(req.body.sauce);
+    // supprime l'ID moongoose généré par défaut
     delete sauceObject._id;
+    // création du nouvel objet
     let sauce = new Sauce({
+        // recup corps de la requête
         ...sauceObject,
         likes: 0,
         dislikes: 0,
         usersLiked: [],
         usersDisliked: [],
+        // modif de L'url de l'image
         imageUrl : `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
+    // sauvegarde du nouvel objet dans la base de donnée
     sauce.save()
         .then(() => {res.status(201).json({message: 'Sauce enregistrée !'})})
         .catch(error => res.status(400).json({error}))
 };
 
+////////// FONCTION POUR MODIFIER UNE SAUCE DANS LA BASE DE DONNEE ///////
 exports.modifySauce = (req, res) => {
-    let sauceObject = {};
-    req.file ? (
-        Sauce.findOne({_id: req.params.id})
-            .then(sauce => {
-                if(req.auth.userId !== sauce.userId){
-                    res.status(403).json({message: `Non autorisé !`})
+    let sauceObject = req.file ? {
+        ...JSON.parse(req.body.sauce),
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` } : { ...req.body };
+
+        delete sauceObject._userId;
+        Sauce.findOne({ _id: req.params.id })
+            .then((sauce) => {
+                if (sauce.userId !== req.auth.userId) {
+                    res.status(401).json({ message: 'Not authorised'});
                 } else {
-                    const filename = sauce.imageUrl.split("/").at(-1);
-                    fs.unlinkSync(`images/${filename}`)
+                    Sauce.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
+                        .then(() => res.status(200).json({ message: 'Objet modifié !' }))
+                        .catch(error => res.status(401).json({ error }));
                 }
-            }),
-            sauceObject = {
-                ...JSON.parse(req.body.sauce),
-                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-            }
-    ) : sauceObject = {...req.body};
-    Sauce.updateOne({_id: req.params.id},{...sauceObject, _id: req.params.id})
-        .then(() => res.status(200).json({message: 'Sauce modifiée !'}))
-        .catch((error) => res.status(400).json({error}))
-};
+            })
+            .catch(( error ) => {
+                res.status(400).json({ error });
+            })
+    };
 
 exports.deleteSauce = (req, res) => {
     Sauce.findOne({_id: req.params.id})
@@ -74,7 +82,7 @@ exports.likeSauce = (req, res) => {
         .then(sauce => {
             if (req.body.like === 1) {
                 if (sauce.usersLiked.includes(req.body.userId)) {
-                    res.status(401).json({error: 'Sauce déja liké'});
+                    res.status(401).json({error: 'Sauce déjà liké'});
                 } else {
                     Sauce.updateOne({ _id: req.params.id }, { $inc: { likes: req.body.like++ }, $push: { usersLiked: req.body.userId } })
                         .then(() => res.status(200).json({ message: 'Like ajouté !' }))
@@ -83,7 +91,7 @@ exports.likeSauce = (req, res) => {
             }
             else if (req.body.like === -1) {
                 if (sauce.usersDisliked.includes(req.body.userId)) {
-                    res.status(401).json({error: 'Sauce déja disliké'});
+                    res.status(401).json({error: 'Sauce déjà disliké'});
                 } else {
                     Sauce.updateOne({ _id: req.params.id }, { $inc: { dislikes: (req.body.like++) * -1 }, $push: { usersDisliked: req.body.userId } })
                         .then(() => res.status(200).json({ message: 'Dislike ajouté !' }))

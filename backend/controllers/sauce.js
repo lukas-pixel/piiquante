@@ -27,38 +27,33 @@ exports.createSauce = (req, res) => {
 };
 
 ////////// FONCTION POUR MODIFIER UNE SAUCE DANS LA BASE DE DONNEE //////////
-exports.modifySauce = (req, res) => {
-    if (req.file) {
-        // si l'image est modifiée, il faut supprimer l'ancienne image dans le dossier /images
-        Sauce.findOne({ _id: req.params.id })
-            .then(sauce => {
-                let filename = sauce.imageUrl.split('/images')[1];
-                fs.unlink(`images/${filename}`, () => {
-                    // une fois que l'ancienne image est supprimé dans le dossier /images, on peut mettre à jour le reste
-                    let sauceObject = {
-                        ...JSON.parse(req.body.sauce),
-                        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-                    }
-                    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-                        .then(() => res.status(200).json({ message: 'Sauce modifiée!' }))
-                        .catch(error => res.status(400).json({ error }));
-                })
-            })
-            .catch(error => res.status(500).json({ error }));
-    } else {
-        // si l'image n'est pas modifiée
-        let sauceObject = { ...req.body };
-        Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-            .then(() => res.status(200).json({ message: 'Sauce modifiée! '}))
-            .catch(error => res.status(400).josn({ error }));
-    }
-    };
+exports.modifySauce = (req, res, next) => {
+    const sauceObject = req.file ? {
+        ...JSON.parse(req.body.sauce),
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    } : { ...req.body };
+
+    delete sauceObject._id;
+    Sauce.findOne({_id: req.params.id})
+        .then((sauce) => {
+            if (sauce._id !== req.auth.userId) {
+                res.status(401).json({ message : 'Not authorized'});
+            } else {
+                Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
+                    .then(() => res.status(200).json({message : 'Objet modifié!'}))
+                    .catch(error => res.status(401).json({ error }));
+            }
+        })
+        .catch((error) => {
+            res.status(400).json({ error });
+        });
+};
 
 ////////// FONCTION POUR SUPPRIMER UNE SAUCE DANS LA BASE DE DONNEE //////////
 exports.deleteSauce = (req, res) => {
     Sauce.findOne({_id: req.params.id})
         .then(sauce => {
-            if(req.auth.userId !== sauce.userId){
+            if(req.auth.userId !== sauce._id){
                 res.status(403).json({message: `Non autorisé !`})
             } else{
                 let filename = sauce.imageUrl.split("/").at(-1);

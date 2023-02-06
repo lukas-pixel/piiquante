@@ -5,8 +5,6 @@ const fs = require('fs');
 
 ////////// FONCTION POUR CREER UNE SAUCE //////////
 exports.createSauce = (req, res) => {
-    console.log('MARINE => ', req.body.sauce);
-    console.log('MARINE 1 => ', req.body);
     // transforme la requête envoyée par le front en JSON
     let sauceObject = JSON.parse(req.body.sauce);
     // supprime l'ID moongoose généré par défaut

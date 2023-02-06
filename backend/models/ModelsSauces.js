@@ -12,8 +12,8 @@ let saucesSchema = mongoose.Schema({
     heat: { type: Number, require: true },
     likes: { type: Number, require: true },
     dislikes: { type: Number, require: true },
-    userLiked: { type: [String], require: true },
-    userDisliked: { type: [String], require: true }
+    usersLiked: { type: [String], require: true },
+    usersDisliked: { type: [String], require: true }
 });
 
 //export du schéma en tant que modèle Mongoose et le rendant disponible sur app express

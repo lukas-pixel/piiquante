@@ -34,7 +34,6 @@ exports.modifySauce = (req, res, next) => {
               //recup du deuxième element du tableau constitué du avant/après '/images/'
               let filename = sauce.imageUrl.split('/images/')[1];
               // supprime le après '/images/' et début du callback
-              console.log('MARINE IMAGE URL => ', sauce.imageUrl)
               fs.unlink(`images/${filename}`, () => console.log('Image supprimée !'))
           })
 

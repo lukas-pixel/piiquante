@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet'); // module de sécurité http pour l'app helmet - installe des http headers différents
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
@@ -18,6 +19,8 @@ mongoose.connect(process.env.DB,
     .catch(() => console.log('Connexion à MongoDB échoué !'));
 
 const app = express();
+// utilisation de helmet pour la sécurité
+app.use(helmet());
 // ajout du middleware express.json afin d'extraire le corps JSON pour la requête POST
 app.use(express.json());
 // Contourner les erreurs de CORS

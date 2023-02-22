@@ -23,12 +23,8 @@ passwordSchema
 
 ////////// FONCTION POUR CREER UN COMPTE //////////
 exports.signup = (req, res, next) => {
-  if(!emailValidator.validate(req.body.email)) {
-    return res.status(401).json({ message: 'Veuillez saisir une adresse email valide'});
-  }
-
-  if(!passwordSchema.validate(req.body.password)) {
-    return res.status(401).json({ message: "Le mot de passe ne doit pas contenir d'espace et doit avoir une longueur entre 8 et 20 caractères contenant au minimum 1 chiffre, 1 minuscule et 1 majuscule"})
+  if(!emailValidator.validate(req.body.email) && !passwordSchema.validate(req.body.password)) {
+    return res.status(401).json({ message: 'Veuillez saisir une adresse email valide et Le mot de passe ne doit pas contenir d\'espace et doit avoir une longueur entre 8 et 20 caractères contenant au minimum 1 chiffre, 1 minuscule et 1 majuscule'});
   }
 
     // appel bcrypt dans le mdp afin de 'saler' celui ci et on demande à l'agorithme de faire 10 tours afin de le securiser

@@ -25,6 +25,11 @@ app.use(helmet());
 app.use(express.json());
 // Contourner les erreurs de CORS
 app.use(cors());
+// autorisation Cross-origin
+app.use((req, res, next) => {
+    res.header("Cross-Origin-Resource-Policy", "cross-origin")
+    next()
+});
 
 //charger des fichiers depuis dossier image
 app.use('/images', express.static(path.join(__dirname, 'images')));

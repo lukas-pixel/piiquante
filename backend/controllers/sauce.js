@@ -31,10 +31,14 @@ exports.modifySauce = (req, res, next) => {
     if (req.file) {
         Sauce.findOne({ _id: req.params.id })
           .then(sauce => {
-              //recup du deuxième element du tableau constitué du avant/après '/images/'
-              let filename = sauce.imageUrl.split('/images/')[1];
-              // supprime le après '/images/' et début du callback
-              fs.unlink(`images/${filename}`, () => console.log('Image supprimée !'))
+            if(req.auth.userId !== sauce._id){
+              res.status(403).json({message: `Non autorisé !`})}
+              else {
+                //recup du deuxième element du tableau constitué du avant/après '/images/'
+                let filename = sauce.imageUrl.split('/images/')[1];
+                // supprime le après '/images/' et début du callback
+                fs.unlink(`images/${filename}`, () => console.log('Image supprimée !'))
+              }
           })
 
 }

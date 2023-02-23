@@ -31,7 +31,7 @@ exports.modifySauce = (req, res, next) => {
     if (req.file) {
         Sauce.findOne({ _id: req.params.id })
           .then(sauce => {
-            if(req.auth.userId !== sauce._id){
+            if(req.auth.userId !== sauce.userId){
               res.status(403).json({message: `Non autorisé !`})}
               else {
                 //recup du deuxième element du tableau constitué du avant/après '/images/'
@@ -40,7 +40,6 @@ exports.modifySauce = (req, res, next) => {
                 fs.unlink(`images/${filename}`, () => console.log('Image supprimée !'))
               }
           })
-
 }
     // on verifie si l'objet existe
     let sauceObject = req.file ? {
@@ -52,7 +51,7 @@ exports.modifySauce = (req, res, next) => {
         // sinon on modifie juste le corps de la requête
         : { ...req.body }
     // modif de la sauce dans la base de donnée
-    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+    Sauce.updateOne({ _id: req.params.id, userId: req.auth.userId }, { ...sauceObject, _id: req.params.id })
     // rep 200 + message
       .then(() => res.status(200).json({ message: 'Article modifiée !'}))
       //erreur 400
@@ -63,7 +62,7 @@ exports.modifySauce = (req, res, next) => {
 exports.deleteSauce = (req, res) => {
     Sauce.findOne({_id: req.params.id})
         .then(sauce => {
-            if(req.auth.userId !== sauce._id){
+            if(req.auth.userId !== sauce.userId){
                 res.status(403).json({message: `Non autorisé !`})
             } else{
                 let filename = sauce.imageUrl.split("/").at(-1);
